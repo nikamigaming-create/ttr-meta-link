@@ -1,0 +1,10 @@
+/build/
+/outputs/
+*.obj
+*.dll
+*.exe
+*.pdb
+*.lib
+*.exp
+*.log
+*.zip

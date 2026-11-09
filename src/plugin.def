@@ -1,0 +1,4 @@
+LIBRARY LocalMetaLink
+EXPORTS
+ NVSEPlugin_Query
+ NVSEPlugin_Load
