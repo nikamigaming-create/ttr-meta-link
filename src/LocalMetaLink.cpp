@@ -8,12 +8,13 @@
 #include <vector>
 #include "../nvse_api.hpp"
 #include "../build_adapter.hpp"
+#include "scope_surface_adapter.hpp"
 #pragma comment(lib,"bcrypt.lib")
 
 namespace {
 HMODULE selfModule{}, retainedIpc{};
 bool metaReady{}, apiPatched{}, apiRefused{};
-bool projectionHandled{};
+bool projectionHandled{},scopeGuardRequested{},scopeGuardHandled{};
 std::wstring logPath;
 constexpr wchar_t section[]=L"LocalMetaLink";
 constexpr wchar_t verifiedMetaManifest[]=L"C:\\Program Files\\Oculus\\Support\\oculus-runtime\\oculus_openxr_32.json";
@@ -68,7 +69,18 @@ bool patch(const std::wstring& path) {
 }
 bool supported(const NVSE* nvse){return nvse&&!nvse->isEditor&&nvse->runtime==0x040020D0&&nvse->version>=6;}
 #include "ttwvr_meta_adapter.hpp"
-void __cdecl onMessage(Message* message){if(message&&(message->type==PostLoad||message->type==PostPostLoad||message->type==DeferredInit)){patchTtrApi();patchTtrProjection();}}
+#include "ttwvr_shadow_adapter.hpp"
+void __cdecl onMessage(Message* message){
+ if(message&&(message->type==PostLoad||message->type==PostPostLoad||message->type==DeferredInit)){
+  patchTtrShadows();patchTtrApi();patchTtrProjection();
+  if(message->type==DeferredInit&&metaReady&&apiPatched&&scopeGuardRequested&&!scopeGuardHandled){
+   scopeGuardHandled=true;auto b=build_adapter::heldModule();
+   log("SCOPE colour isolation: %s",b&&scope_surface_adapter::install(b)?"installed (native lens capture preserved)":"refused build/call guard");
+  }
+ }
+ if(message&&message->type==ExitGame&&scopeGuardHandled)
+  log("SCOPE restores=%u attempts=%u failures=%u lastHRESULT=%08lX surface=%ux%u samples=%u",scope_surface_adapter::restored.load(),scope_surface_adapter::attempts.load(),scope_surface_adapter::failures.load(),scope_surface_adapter::lastResult.load(),scope_surface_adapter::width.load(),scope_surface_adapter::height.load(),scope_surface_adapter::samples.load());
+}
 }
 
 BOOL WINAPI DllMain(HINSTANCE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH){selfModule=module;DisableThreadLibraryCalls(module);}return TRUE;}
@@ -82,6 +94,11 @@ extern "C" __declspec(dllexport) bool __cdecl NVSEPlugin_Load(const NVSE* nvse){
  const auto directory=own.substr(0,slash+1);const auto ini=directory+L"LocalMetaLink.ini";logPath=directory+L"LocalMetaLink.log";
  log("LOAD: LocalMetaLink 1 runtime=%08X xNVSE=%u PID=%lu",nvse->runtime,nvse->version,GetCurrentProcessId());
  if(!GetPrivateProfileIntW(section,L"Enabled",0,ini.c_str())){log("DISABLED: Enabled=0 (default)");return true;}
+ scopeGuardRequested=GetPrivateProfileIntW(section,L"ScopeSurfaceGuard",0,ini.c_str())!=0;
+ shadowsRequested=GetPrivateProfileIntW(section,L"NativeShadows",0,ini.c_str())!=0;
+ auto messaging=static_cast<Messaging*>(nvse->queryInterface(2));
+ if(messaging)log("API/graphics listener registered=%d",messaging->listen(nvse->getPluginHandle(),"NVSE",onMessage));
+ patchTtrShadows();
  const auto manifest=setting(ini,L"RuntimeJson",verifiedMetaManifest);
  const auto ipc=setting(ini,L"IpcDll",L"C:\\Program Files\\Oculus\\Support\\oculus-runtime\\RuntimeIPCServiceClient_32.dll");
  if(manifest.empty()||ipc.empty()){log("REFUSED: configuration paths must be absolute");return true;}
@@ -104,8 +121,6 @@ extern "C" __declspec(dllexport) bool __cdecl NVSEPlugin_Load(const NVSE* nvse){
  if(!patch(ipc)){log("REFUSED: compatibility guard failed; runtime environment unchanged");return true;}
  if(!explicitRuntime&&!SetEnvironmentVariableW(L"XR_RUNTIME_JSON",manifest.c_str())){log("ERROR: process-local runtime selection failed error=%lu",GetLastError());return true;}
  metaReady=true;
- auto messaging=static_cast<Messaging*>(nvse->queryInterface(2));
- if(messaging)log("API listener registered=%d",messaging->listen(nvse->getPluginHandle(),"NVSE",onMessage));
  patchTtrApi();
  patchTtrProjection();
  log("READY: process-local Meta runtime selected; no registry or installed DLL changes");return true;

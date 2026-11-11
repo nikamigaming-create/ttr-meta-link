@@ -12,11 +12,11 @@ $files=[ordered]@{
 $commit=git -C $repo rev-parse HEAD
 if($LASTEXITCODE){throw 'Source must be committed before packaging'}
 $dirty=@(git -C $repo status --porcelain --untracked-files=normal)
-$manifest=[ordered]@{addon='TTR Meta Link';version='1.0.0';architecture='x86';sourceCommit="$commit".Trim();sourceDirty=($dirty.Count -gt 0);supportedTTWVR='C9D047D4199C0458281D341AC9DC438A7C928999E19CDAD6F327F8A439A7F9EB';supportedMetaIPC='D072611E9BA99EFC51FA5C9AAD9EECB6E1BA9FDDA8069EC96142241F75A57531';files=@($files.Keys|Sort-Object|ForEach-Object{@{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $repo $files[$_])).Hash}})}
+$manifest=[ordered]@{addon='TTR Meta Link';version='1.1.0-beta';architecture='x86';sourceCommit="$commit".Trim();sourceDirty=($dirty.Count -gt 0);supportedTTWVR='E428C4BD1209D58D21F75108808C86049E26C76E58A164AD864A61B99696BDAB';supportedMetaIPC='D072611E9BA99EFC51FA5C9AAD9EECB6E1BA9FDDA8069EC96142241F75A57531';files=@($files.Keys|Sort-Object|ForEach-Object{@{path=$_;sha256=(Get-FileHash -LiteralPath (Join-Path $repo $files[$_])).Hash}})}
 Add-Type -AssemblyName System.IO.Compression
 $out=Join-Path $repo 'outputs'
 New-Item -ItemType Directory -Force $out|Out-Null
-$destination=Join-Path $out 'TTR-Meta-Link-1.0.0.zip'
+$destination=Join-Path $out 'TTR-Meta-Link-1.1.0-beta.zip'
 $temp=Join-Path $out ('package-'+[guid]::NewGuid().ToString('N')+'.tmp')
 $stream=[IO.File]::Open($temp,[IO.FileMode]::CreateNew)
 $zip=[IO.Compression.ZipArchive]::new($stream,[IO.Compression.ZipArchiveMode]::Create,$true)

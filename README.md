@@ -2,7 +2,7 @@
 
 **Direct Meta Link / Air Link compatibility for A Tale of Two Realities.**
 
-**v1.0.0 beta** · [Download the MO2 ZIP](https://github.com/nikamigaming-create/ttr-meta-link/releases/tag/v1.0.0)
+**v1.1.0-beta beta** · [Download the MO2 ZIP](https://github.com/nikamigaming-create/ttr-meta-link/releases/tag/v1.1.0-beta)
 · [Filthy Casual TTR companion addon](https://github.com/nikamigaming-create/filthy-casual-ttr)
 
 Quest → Meta Link / Air Link → Meta OpenXR → TTWVR.
@@ -26,7 +26,7 @@ explicit XR_RUNTIME_JSON selecting another runtime makes this helper skip.
 1. Have a working, legally installed Fallout: New Vegas + TTW + TTWVR setup,
    including the base mod's xNVSE dependencies, and installed Meta Quest Link.
 2. Check the exact supported hashes below. Close the game.
-3. Install **TTR-Meta-Link-1.0.0.zip** using MO2's archive installer. Enable it
+3. Install **TTR-Meta-Link-1.1.0-beta.zip** using MO2's archive installer. Enable it
    below TTWVR in the left pane. Keep only one copy of LocalMetaLink.dll enabled.
 4. Connect the Quest through Link or Air Link and enter Link in the headset.
 5. Launch your usual TTWVR game entry through MO2, not the stock game launcher.
@@ -44,7 +44,7 @@ insufficient: the file hashes below are the compatibility checks.
 
 | File | SHA-256 |
 | --- | --- |
-| TTWVR.dll | `C9D047D4199C0458281D341AC9DC438A7C928999E19CDAD6F327F8A439A7F9EB` |
+| TTWVR.dll | `E428C4BD1209D58D21F75108808C86049E26C76E58A164AD864A61B99696BDAB` |
 | RuntimeIPCServiceClient_32.dll | `D072611E9BA99EFC51FA5C9AAD9EECB6E1BA9FDDA8069EC96142241F75A57531` |
 
 Only the standard Meta installation manifest is accepted in this release:
@@ -64,9 +64,9 @@ No guaranteed frame-rate improvement is claimed. Native eye-replay/graphics
 options remain those of your existing TTWVR setup. It does not add hand gestures,
 selectors, reload controls or save handling. No game or Meta binaries are bundled.
 
-Physical headset testing confirmed corrected controller orientation and normal
-distant-object fusion/head movement for the supported combination. Other headset
-models and runtime builds have not been validated. This is a compatibility beta,
+Earlier TTR builds received physical headset confirmation of controller orientation
+and stereo fusion. This TTR 1.1 port has passed mapped-image API/FOV/scope/shadow
+guard checks, but has not received a new physical Meta Link headset acceptance run. This is a compatibility beta,
 not a replacement for TTWVR or a general-purpose OpenXR translation layer.
 
 ## Troubleshooting and removal
@@ -99,3 +99,10 @@ licensed and must be obtained through their own distribution channels.
 ![Nikami TTR mods: features, Quest controls and MO2 installation](docs/assets/nikami-ttr-mods.png)
 
 The artwork is illustrative. It is not a gameplay screenshot.
+
+## TTR 1.1 update
+
+The scope-surface guard preserves the native shared colour surface around scope
+rendering. `ScopeSurfaceGuard=1` enables it. `NativeShadows=0` leaves the optional
+actor-shadow settings override off; this is not new environmental shadow rendering.
+No personal DLSS, AA, resolution, textures or Link presets are distributed.
