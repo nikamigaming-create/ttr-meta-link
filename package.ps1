@@ -5,6 +5,7 @@ $files=[ordered]@{
  'NVSE/Plugins/LocalMetaLink.ini'='LocalMetaLink.ini'
  'meta.ini'='meta.ini'
  'README.md'='README.md'
+ 'docs/VALIDATION.md'='docs/VALIDATION.md'
  'LICENSE'='LICENSE'
  'docs/assets/nikami-ttr-mods.png'='docs/assets/nikami-ttr-mods.png'
  'docs/assets/ART-PROVENANCE.md'='docs/assets/ART-PROVENANCE.md'
