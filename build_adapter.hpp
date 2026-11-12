@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 #pragma comment(lib,"bcrypt.lib")
-// TTWVR build 6AF40B94 / TTR1.1 only. Verified built-in default entry RVA 7443C8:
+// TTWVR build 6AF4F66C / TTR1.1.2 only. Verified built-in default entry RVA 7443C8:
 // {section="Reload", key="bManual", value="1"}. The cached setting then
 // controls the original mod's reload path; we change only this default pointer.
 namespace build_adapter {
@@ -26,7 +26,7 @@ inline bool verifiedTTWVR(HMODULE m) {
  if(ferror(f))ok=false;fclose(f);
  if(ok)ok=BCryptFinishHash(hash,digest,sizeof(digest),0)>=0;
  if(hash)BCryptDestroyHash(hash);if(alg)BCryptCloseAlgorithmProvider(alg,0);
- const unsigned char expected[32]={0xE4,0x28,0xC4,0xBD,0x12,0x09,0xD5,0x8D,0x21,0xF7,0x51,0x08,0x80,0x8C,0x86,0x04,0x9E,0x26,0xC7,0x6E,0x58,0xA1,0x64,0xAD,0x86,0x4A,0x61,0xB9,0x96,0x96,0xBD,0xAB};
+ const unsigned char expected[32]={0xC5,0x65,0xA6,0xC2,0x96,0xB5,0x97,0xF8,0x9F,0xCF,0x84,0xD7,0xF6,0x00,0x1D,0x47,0xD1,0x63,0x57,0x92,0xF0,0xE8,0xCA,0xCA,0xD9,0x2C,0x6A,0x88,0xF6,0x82,0x3E,0x73};
  return ok&&memcmp(digest,expected,32)==0;
 }
 inline const char* disableManualReload() {
@@ -35,7 +35,7 @@ inline const char* disableManualReload() {
  auto base=reinterpret_cast<unsigned char*>(m);
  auto dos=reinterpret_cast<IMAGE_DOS_HEADER*>(base);
  auto nt=reinterpret_cast<IMAGE_NT_HEADERS32*>(base+dos->e_lfanew);
- if(nt->FileHeader.Machine!=IMAGE_FILE_MACHINE_I386||nt->FileHeader.TimeDateStamp!=0x6AF40B94)return "REFUSED: PE build mismatch";
+ if(nt->FileHeader.Machine!=IMAGE_FILE_MACHINE_I386||nt->FileHeader.TimeDateStamp!=0x6AF4F66C)return "REFUSED: PE build mismatch";
  struct Entry {const char* section;const char* key;const char* value;};
  auto entry=reinterpret_cast<Entry*>(base+0x82B528);
  if(entry->section!=reinterpret_cast<char*>(base+0x82CF68)||entry->key!=reinterpret_cast<char*>(base+0x82CF70)||entry->value!=reinterpret_cast<char*>(base+0x82C1C4))return "REFUSED: default-table pointer mismatch";
@@ -85,9 +85,9 @@ inline void* grabbedItem() {
  if(b[0x136CF04]&&*reinterpret_cast<int*>(b+0x136CF08)==1)return *reinterpret_cast<void**>(b+0x136CF0C);
  return b[0x136CE35]?*reinterpret_cast<void**>(b+0x136D2F0):nullptr;
 }
-inline int grabbedHand() {auto b=heldModule();if(!b)return -1;if(b[0x136CF04]&&*reinterpret_cast<int*>(b+0x136CF08)==1)return 1;return b[0x136CE35]?*reinterpret_cast<int*>(b+0xEC33E8):-1;}
+inline int grabbedHand() {auto b=heldModule();if(!b)return -1;if(b[0x136CF04]&&*reinterpret_cast<int*>(b+0x136CF08)==1)return 1;return b[0x136CE35]?*reinterpret_cast<int*>(b+0xEB5A88):-1;}
 inline int stimHand() {auto b=heldModule();return b?*reinterpret_cast<int*>(b+0xECD1BC):-1;}
-inline void releaseGrab() {if(auto b=heldModule())reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19DB30)("selector replacement");}
+inline void releaseGrab() {if(auto b=heldModule())reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19E3A0)("selector replacement");}
 inline void clearStim(void* player) {if(auto b=heldModule())reinterpret_cast<void(__cdecl*)(void*,const char*)>(b+0x39FB40)(player,"selector replacement");}
 inline bool stowSelectedGrab(void* player,void* wanted){
  auto b=heldModule();if(!b||!player||!wanted)return false;
@@ -103,14 +103,14 @@ inline bool stowSelectedGrab(void* player,void* wanted){
  // Exact native release-all routine 1930E0 uses this swap/release/swap sequence
  // to address slot two. Use it for the selected slot only, preserving the other.
  const unsigned char swapCode[]={0x81,0xEC,0xCC,0,0,0,0x56,0x57};
- if(memcmp(b+0x1A0710,swapCode,sizeof(swapCode)))return false;
- int otherHand=*reinterpret_cast<int*>(b+0xEC33E8);
- int hand=*reinterpret_cast<int*>(b+(secondary?0x136CF08:0xEC33E8));
- auto swap=reinterpret_cast<void(__cdecl*)()>(b+0x1A0710);
- auto release=reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19DB30);
+ if(memcmp(b+0x24ADE0,swapCode,sizeof(swapCode)))return false;
+ int otherHand=*reinterpret_cast<int*>(b+0xEB5A88);
+ int hand=*reinterpret_cast<int*>(b+(secondary?0x136CF08:0xEB5A88));
+ auto swap=reinterpret_cast<void(__cdecl*)()>(b+0x24ADE0);
+ auto release=reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19E3A0);
  if(shared){release("sticky shared item stow");swap();release("sticky shared item stow");swap();}
  else {if(secondary)swap();release("sticky item stow");if(secondary)swap();}
- auto cancelPull=reinterpret_cast<void(__cdecl*)(int,const char*)>(b+0x1966B0);
+ auto cancelPull=reinterpret_cast<void(__cdecl*)(int,const char*)>(b+0x198050);
  cancelPull(hand,"sticky item stow");
  if(shared&&otherHand!=hand)cancelPull(otherHand,"sticky shared item stow");
  if((b[0x136CE35]&&*reinterpret_cast<void**>(b+0x136D2F0)==wanted)||(b[0x136CF04]&&*reinterpret_cast<void**>(b+0x136CF0C)==wanted))return false;
@@ -123,7 +123,7 @@ inline void stowGrab(void* player) {
  void* second=b[0x136CF04]?*reinterpret_cast<void**>(b+0x136CF0C):nullptr;
  // The native dual-hand cleanup swaps/releases both slots and cancels pulls.
  // Releasing only the primary slot can leave an already-stowed ref in slot two.
- reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19DAE0)("selector replacement");
+ reinterpret_cast<void(__cdecl*)(const char*)>(b+0x19DF20)("selector replacement");
  // Same TESObjectREFR::Activate call used by TTWVR's backpack at RVA 19C4DD.
  if(first)reinterpret_cast<void(__thiscall*)(void*,void*,int,int,int)>(0x00573170)(first,player,0,0,1);
  if(second&&second!=first)reinterpret_cast<void(__thiscall*)(void*,void*,int,int,int)>(0x00573170)(second,player,0,0,1);
@@ -132,7 +132,7 @@ inline int grabSelected(void* player,const float* head,void* item) {
  auto b=heldModule();if(!b||!player||!head||!item)return 0;
  // cdecl(player, world head position, right-hand bool, required reference).
  // Required reference restricts native proximity picking to the selected item.
- return reinterpret_cast<int(__cdecl*)(void*,const float*,bool,void*)>(b+0x1A5890)(player,head,true,item);
+ return reinterpret_cast<int(__cdecl*)(void*,const float*,bool,void*)>(b+0x1A7700)(player,head,true,item);
 }
 inline void* dropOneAid(void* player,void* form,void* extra) {
  if(!player||!form)return nullptr;

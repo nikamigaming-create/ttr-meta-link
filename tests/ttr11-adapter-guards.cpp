@@ -22,6 +22,6 @@ int wmain(int argc,wchar_t** argv){
  shadowsRequested=true;patchTtrShadows();
  if(*reinterpret_cast<float*>(b+0x9F9F58)!=1.0f)return 6;
  if(!scope_surface_adapter::install(b))return 7;
- puts("PASS exact TTR1.1 mapped-image API/FOV/shadow/scope guards and patches; no TTR code executed");
+ puts("PASS exact TTR1.1.2 mapped-image API/FOV/shadow/scope guards and patches; no TTR code executed");
  return 0;
 }

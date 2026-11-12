@@ -5,7 +5,7 @@ void patchTtrApi(){
  if(!metaReady||apiPatched||apiRefused)return;
  auto module=GetModuleHandleW(L"TTWVR.dll");if(!module)return;
  if(!build_adapter::verifiedTTWVR(module)){apiRefused=true;log("API REFUSED: unsupported TTWVR file hash");return;}
- // Exact build 6AF40B94: two immediate stores construct XrVersion 1.0.49.
+ // Exact build 6AF4F66C (TTR 1.1.2): two immediate stores construct XrVersion 1.0.49.
  // Meta 208's feature gate ignores the minor version and activates its
  // nominal 1.1.49 aim change without the matching 1.1.53 rotation change.
  // Matched probes: 1.0.49 => 177 degrees; 1.1.59 => corrected ~60 degrees.
@@ -20,7 +20,7 @@ void patchTtrApi(){
  context[6]=0x3B;context[16]=0x01;
  BOOL flushed=FlushInstructionCache(GetCurrentProcess(),context,sizeof(expected));DWORD ignored{};BOOL restored=VirtualProtect(context,sizeof(expected),old,&ignored);
  apiPatched=true;
- log("API APPLIED: TTWVR verified hash E428C4BD1209D58D21F75108808C86049E26C76E58A164AD864A61B99696BDAB RVA=0x6144FB/0x614505 request 1.0.49 -> 1.1.59 flush=%d protectionRestored=%d; native poses/bindings unchanged",flushed,restored);
+ log("API APPLIED: TTWVR verified hash C565A6C296B597F89FCF84D7F6001D47D1635792F0E8CACAD92C6A88F6823E73 RVA=0x6144FB/0x614505 request 1.0.49 -> 1.1.59 flush=%d protectionRestored=%d; native poses/bindings unchanged",flushed,restored);
 }
 void patchTtrProjection(){
  if(!metaReady||!apiPatched||projectionHandled)return;
